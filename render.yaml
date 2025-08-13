@@ -38,12 +38,13 @@ services:
       - key: ALLOWED_HOSTS
         sync: false
 
-  # 4. The React Frontend (Static Site)
-  - type: static
+  # 4. The React Frontend (SPA)
+  - type: web
     name: yaba-bingo-frontend
+    env: node
     rootDir: ./frontend
     buildCommand: "npm install && npm run build"
-    staticPublishPath: ./dist
+    startCommand: "npx serve -s dist"
     buildFilter:
       paths:
         - "frontend/**"
