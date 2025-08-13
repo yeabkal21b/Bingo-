@@ -1,71 +1,59 @@
-==========================================================
-Yaba Bigo | Render Blueprint
-==========================================================
+# ==========================================================
+# Yaba Bigo | Render Blueprint
+# ==========================================================
 
 services:
+  # 1. The PostgreSQL Database
+  - type: pserv
+    name: yaba-bingo-db
+    env: postgres
 
-1. The PostgreSQL Database
+  # 2. The Redis Instance (for Channels)
+  - type: pserv
+    name: yaba-bingo-redis
+    env: redis
 
-type: pserv
-name: yaba-bingo-db
-env: postgres
+  # 3. The Django Backend (Web Service)
+  - type: web
+    name: yaba-bingo-backend
+    env: python
+    rootDir: ./backend
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "daphne yaba_bingo.asgi:application --port $PORT --bind 0.0.0.0"
+    healthCheckPath: /api/transactions/
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: yaba-bingo-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: pserv
+          name: yaba-bingo-redis
+          property: connectionString
+      - key: DJANGO_SECRET_KEY
+        sync: false
+      - key: DEBUG
+        value: false
+      - key: ALLOWED_HOSTS
+        sync: false
 
-2. The Redis Instance (for Channels)
-
-type: pserv
-name: yaba-bingo-redis
-env: redis
-
-3. The Django Backend (Web Service)
-
-type: web
-name: yaba-bingo-backend
-env: python
-rootDir: ./backend
-buildCommand: "pip install -r requirements.txt"
-startCommand: "daphne yaba_bingo.asgi:application --port $PORT --bind 0.0.0.0"
-healthCheckPath: /api/transactions/
-envVars:
-
-key: DATABASE_URL
-fromDatabase:
-name: yaba-bingo-db
-property: connectionString
-
-key: REDIS_URL
-fromService:
-type: pserv
-name: yaba-bingo-redis
-property: connectionString
-
-key: DJANGO_SECRET_KEY
-sync: false
-
-key: DEBUG
-value: false
-
-key: ALLOWED_HOSTS
-sync: false
-
-4. The React Frontend (Static Site)
-
-type: static
-name: yaba-bingo-frontend
-rootDir: ./frontend
-buildCommand: "npm install && npm run build"
-staticPublishPath: ./dist
-buildFilter:
-paths:
-- "frontend/**"
-routes:
-
-type: rewrite
-source: "/*"
-destination: "/index.html"
-envVars:
-
-key: VITE_API_URL
-fromService:
-type: web
-name: yaba-bingo-backend
-property: url
+  # 4. The React Frontend (Static Site)
+  - type: static
+    name: yaba-bingo-frontend
+    rootDir: ./frontend
+    buildCommand: "npm install && npm run build"
+    staticPublishPath: ./dist
+    buildFilter:
+      paths:
+        - "frontend/**"
+    routes:
+      - type: rewrite
+        source: "/*"
+        destination: "/index.html"
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          type: web
+          name: yaba-bingo-backend
+          property: url
