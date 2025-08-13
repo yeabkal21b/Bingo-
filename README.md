@@ -1,4 +1,4 @@
-# Yaba bigo | ያባ ቢንጎ
+# Yaba bigo | ያባ ቢጎ
 
 A multi-tenant, hybrid digital-physical bingo platform. Django (Channels) backend, React/Vite frontend, PostgreSQL, Tailwind CSS, ready for Render.com deployment.
 
