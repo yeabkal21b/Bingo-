@@ -8,7 +8,20 @@ from rest_framework.response import Response
 from .models import Agent, Transaction
 from .serializers import TransactionSerializer
 
+class HealthCheckView(APIView):
+    """
+    A public endpoint that returns a 200 OK status.
+    Used by Render for health checks.
+    """
+    permission_classes = [AllowAny]
+
+    def get(self, request, *args, **kwargs):
+        return Response({"status": "ok"})
+
 class TransactionListView(APIView):
+    """
+    Returns the transaction history for the currently authenticated agent.
+    """
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
@@ -22,6 +35,9 @@ class TransactionListView(APIView):
         return Response(serializer.data)
 
 class LoginView(APIView):
+    """
+    Handles user login and creates a session.
+    """
     permission_classes = [AllowAny]
 
     def post(self, request, *args, **kwargs):
@@ -40,6 +56,9 @@ class LoginView(APIView):
         )
 
 class LogoutView(APIView):
+    """
+    Handles user logout and destroys the session.
+    """
     permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
@@ -48,13 +67,13 @@ class LogoutView(APIView):
 
 @method_decorator(ensure_csrf_cookie, name='dispatch')
 class UserView(APIView):
+    """
+    Returns the current authenticated user's data.
+    """
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        # Using hasattr is more robust, as you suggested.
-        # It checks for the reverse relationship from the Agent model.
         is_agent_check = hasattr(request.user, 'agent')
-
         return Response({
             'username': request.user.username,
             'is_agent': is_agent_check,
