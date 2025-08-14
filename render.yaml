@@ -33,7 +33,7 @@ services:
         value: false
 
   # 4. The React Frontend (Static Site)
-  - type: static site
+  - type: 
     name: yaba-bingo-frontend
     rootDir: ./frontend
     buildCommand: "npm install && npm run build"
