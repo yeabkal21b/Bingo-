@@ -1,41 +1,55 @@
-# ==========================================================
-# Yaba Bigo | Render Blueprint (Production)
-# ==========================================================
-
 services:
-  # 1. Django Backend (Web Service)
+  # 1. The PostgreSQL Database
+  - type: pserv
+    name: yaba-bingo-db
+    env: postgres
+
+  # 2. The Redis Instance (for Channels)
+  - type: pserv
+    name: yaba-bingo-redis
+    env: redis
+
+  # 3. The Django Backend (Web Service)
   - type: web
     name: yaba-bingo-backend
     env: python
     rootDir: ./backend
     buildCommand: "pip install -r requirements.txt"
     startCommand: "daphne yaba_bingo.asgi:application --port $PORT --bind 0.0.0.0"
-    healthCheckPath: /api/transactions/
+    healthCheckPath: /api/health/ # <--- THIS IS THE CORRECTED LINE
     envVars:
       - key: DATABASE_URL
-        sync: false  # Set from Render dashboard after provisioning DB
+        fromDatabase:
+          name: yaba-bingo-db
+          property: connectionString
       - key: REDIS_URL
-        sync: false  # Set from Render dashboard after provisioning Redis
+        fromService:
+          type: pserv
+          name: yaba-bingo-redis
+          property: connectionString
       - key: DJANGO_SECRET_KEY
-        sync: false  # Set securely in dashboard
+        sync: false
       - key: DEBUG
         value: false
       - key: ALLOWED_HOSTS
-        sync: false  # Set to your production domain(s)
+        sync: false
 
-  # 2. React Frontend (SPA, Served with Node)
-  - type: web
+  # 4. The React Frontend (Static Site)
+  - type: static
     name: yaba-bingo-frontend
-    env: node
     rootDir: ./frontend
     buildCommand: "npm install && npm run build"
-    startCommand: "npx serve -s dist"
+    staticPublishPath: ./dist
     buildFilter:
       paths:
         - "frontend/**"
+    routes:
+      - type: rewrite
+        source: "/*"
+        destination: "/index.html"
     envVars:
       - key: VITE_API_URL
         fromService:
           type: web
           name: yaba-bingo-backend
-          property: hostport
+          property: url
