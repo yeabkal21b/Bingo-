@@ -9,7 +9,7 @@ services:
     name: yaba-bingo-redis
     env: redis
 
-  # 3. The Django Backend (Web Service)
+  # 3. The Django Backend
   - type: web
     name: yaba-bingo-backend
     env: python
