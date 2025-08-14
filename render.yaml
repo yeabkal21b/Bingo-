@@ -33,14 +33,12 @@ services:
         value: false
 
   # 4. The React Frontend (Static Site)
-  - type: static_site # <--- CORRECTED: "static_site" is the valid type
+  - type: static_site
     name: yaba-bingo-frontend
+    env: static # Let's try explicitly setting the environment
     rootDir: ./frontend
     buildCommand: "npm install && npm run build"
-    staticPublishPath: dist # <--- CORRECTED: Path is relative to the rootDir
-    buildFilter:
-      paths:
-        - "frontend/**"
+    staticPublishPath: dist
     routes:
       - type: rewrite
         source: "/*"
