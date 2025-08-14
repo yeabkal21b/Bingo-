@@ -9,7 +9,7 @@ services:
     name: yaba-bingo-redis
     env: redis
 
-  # 3. The Django Backend
+  # 3. The Django Backend (Web Service)
   - type: web
     name: yaba-bingo-backend
     env: python
@@ -31,20 +31,3 @@ services:
         generateValue: true
       - key: DEBUG
         value: false
-
-  # 4. The React Frontend (The FREE and FAST way)
-  - type: static_site
-    name: yaba-bingo-frontend
-    rootDir: ./frontend
-    buildCommand: "npm install && npm run build"
-    staticPublishPath: dist
-    routes:
-      - type: rewrite
-        source: "/*"
-        destination: "/index.html"
-    envVars:
-      - key: VITE_API_URL
-        fromService:
-          type: web
-          name: yaba-bingo-backend
-          property: url
