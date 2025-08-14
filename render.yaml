@@ -28,17 +28,16 @@ services:
           name: yaba-bingo-redis
           property: connectionString
       - key: DJANGO_SECRET_KEY
-        generateValue: true  # SAFER: Render generates a secure secret
+        generateValue: true
       - key: DEBUG
         value: false
-      # ALLOWED_HOSTS not needed unless you have custom domains
 
   # 4. The React Frontend (Static Site)
-  - type: static
+  - type: static_site # <--- CORRECTED: "static_site" is the valid type
     name: yaba-bingo-frontend
     rootDir: ./frontend
     buildCommand: "npm install && npm run build"
-    staticPublishPath: frontend/dist
+    staticPublishPath: dist # <--- CORRECTED: Path is relative to the rootDir
     buildFilter:
       paths:
         - "frontend/**"
