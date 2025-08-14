@@ -2,6 +2,8 @@
 Yaba Bigo | Render Blueprint (Production)
 ==========================================================
 services:
+
+
 1. Django Backend (Web Service)
 type: web
 name: yaba-bingo-backend
@@ -41,6 +43,6 @@ paths:
 envVars:
 key: VITE_API_URL
 fromService:
-type: web
+type: static-site
 name: yaba-bingo-backend
 property: hostport
