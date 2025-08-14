@@ -1,7 +1,11 @@
 ==========================================================
 Yaba Bigo | Render Blueprint (Production)
 ==========================================================
+
+
 services:
+
+
 1. Django Backend (Web Service)
 
 type: web
