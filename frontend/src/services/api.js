@@ -5,4 +5,8 @@ const API = axios.create({
   withCredentials: true,
 });
 
-export const fetchTransactions = () => API.get('/api/transactions/');
+// Configure Axios to automatically handle Django's CSRF protection
+API.defaults.xsrfCookieName = 'csrftoken';
+API.defaults.xsrfHeaderName = 'X-CSRFToken';
+
+export default API;
