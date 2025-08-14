@@ -1,9 +1,15 @@
-# ==========================================================
-# Yaba Bigo | Render Blueprint (Production)
-# ==========================================================
-
 services:
-  # 1. Django Backend (Web Service)
+  # 1. The PostgreSQL Database
+  - type: pserv
+    name: yaba-bingo-db
+    env: postgres
+
+  # 2. The Redis Instance
+  - type: pserv
+    name: yaba-bingo-redis
+    env: redis
+
+  # 3. The Django Backend
   - type: web
     name: yaba-bingo-backend
     env: python
@@ -13,29 +19,32 @@ services:
     healthCheckPath: /api/health/
     envVars:
       - key: DATABASE_URL
-        sync: false  # Set from Render dashboard after provisioning DB
+        fromDatabase:
+          name: yaba-bingo-db
+          property: connectionString
       - key: REDIS_URL
-        sync: false  # Set from Render dashboard after provisioning Redis
+        fromService:
+          type: pserv
+          name: yaba-bingo-redis
+          property: connectionString
       - key: DJANGO_SECRET_KEY
-        sync: false  # Set securely in dashboard
+        generateValue: true
       - key: DEBUG
         value: false
-      - key: ALLOWED_HOSTS
-        sync: false  # Set to your production domain(s)
 
-  # 2. React Frontend (SPA, Served with Node)
-  - type: web
+  # 4. The React Frontend
+  - type: static_site
     name: yaba-bingo-frontend
-    env: node
     rootDir: ./frontend
     buildCommand: "npm install && npm run build"
-    startCommand: "npx serve -s dist"
-    buildFilter:
-      paths:
-        - "frontend/**"
+    staticPublishPath: dist
+    routes:
+      - type: rewrite
+        source: "/*"
+        destination: "/index.html"
     envVars:
       - key: VITE_API_URL
         fromService:
           type: web
           name: yaba-bingo-backend
-          property: hostport
+          property: url
