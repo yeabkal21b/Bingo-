@@ -4,12 +4,12 @@ services:
     name: yaba-bingo-db
     env: postgres
 
-  # 2. The Redis Instance (for Channels)
+  # 2. The Redis Instance
   - type: pserv
     name: yaba-bingo-redis
     env: redis
 
-  # 3. The Django Backend (Web Service)
+  # 3. The Django Backend
   - type: web
     name: yaba-bingo-backend
     env: python
@@ -32,15 +32,12 @@ services:
       - key: DEBUG
         value: false
 
-  # 4. The React Frontend (Static Site)
-  - type: web
+  # 4. The React Frontend
+  - type: static_site # <--- THIS IS THE CORRECT AND REQUIRED TYPE
     name: yaba-bingo-frontend
     rootDir: ./frontend
     buildCommand: "npm install && npm run build"
     staticPublishPath: dist
-    buildFilter:
-      paths:
-        - "frontend/**"
     routes:
       - type: rewrite
         source: "/*"
