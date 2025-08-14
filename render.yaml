@@ -16,7 +16,7 @@ services:
     rootDir: ./backend
     buildCommand: "pip install -r requirements.txt"
     startCommand: "daphne yaba_bingo.asgi:application --port $PORT --bind 0.0.0.0"
-    healthCheckPath: /api/health/ # <--- THIS IS THE CORRECTED LINE
+    healthCheckPath: /api/health/
     envVars:
       - key: DATABASE_URL
         fromDatabase:
@@ -28,18 +28,17 @@ services:
           name: yaba-bingo-redis
           property: connectionString
       - key: DJANGO_SECRET_KEY
-        sync: false
+        generateValue: true  # SAFER: Render generates a secure secret
       - key: DEBUG
         value: false
-      - key: ALLOWED_HOSTS
-        sync: false
+      # ALLOWED_HOSTS not needed unless you have custom domains
 
   # 4. The React Frontend (Static Site)
   - type: static
     name: yaba-bingo-frontend
     rootDir: ./frontend
     buildCommand: "npm install && npm run build"
-    staticPublishPath: ./dist
+    staticPublishPath: frontend/dist
     buildFilter:
       paths:
         - "frontend/**"
