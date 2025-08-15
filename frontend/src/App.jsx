@@ -10,7 +10,7 @@ export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [currentUser, setCurrentUser] = useState(null);
-  const [view, setView] = useState('game'); // Default to a view anyone can see
+  const [view, setView] = useState('game');
 
   useEffect(() => {
     const checkAuthStatus = async () => {
@@ -18,7 +18,6 @@ export default function App() {
         const response = await API.get('/api/user/');
         setIsAuthenticated(true);
         setCurrentUser(response.data);
-        // If the user is an agent, set their default view to transactions
         if (response.data.is_agent) {
           setView('transactions');
         }
@@ -35,8 +34,7 @@ export default function App() {
   const handleLogin = (userData) => {
     setIsAuthenticated(true);
     setCurrentUser(userData);
-    // Set the default view based on their role after login
-    if (userData.is_agent) {
+    if (userData.username && userData.is_agent) {
       setView('transactions');
     } else {
       setView('game');
@@ -47,7 +45,6 @@ export default function App() {
     try {
       await API.post('/api/logout/');
     } finally {
-      // Ensure state is cleared even if logout fails
       setIsAuthenticated(false);
       setCurrentUser(null);
     }
@@ -70,7 +67,7 @@ export default function App() {
       <aside className="w-64 bg-rowAlt p-4 flex flex-col">
         <SidebarProfile username={currentUser?.username} />
         <nav className="flex flex-col gap-4">
-          {/* Only show the Transactions button if the user is an agent */}
+          {/* This button will now appear correctly for agents */}
           {currentUser?.is_agent && (
             <button onClick={() => setView('transactions')} className={`text-left px-2 py-1 rounded ${view === 'transactions' ? 'bg-blue text-white' : 'text-blue'}`}>Transaction History</button>
           )}
@@ -84,7 +81,6 @@ export default function App() {
         </div>
       </aside>
       <main className="flex-1 p-8">
-        {/* Only render the component if the view matches AND the user is an agent */}
         {view === 'transactions' && currentUser?.is_agent && <TransactionHistory />}
         {view === 'transactions' && !currentUser?.is_agent && <div>You do not have permission to view this page.</div>}
         {view === 'boards' && <BoardActivationCenter boards={Array.from({ length: 100 }, (_, i) => ({ id: i + 1 }))} />}
