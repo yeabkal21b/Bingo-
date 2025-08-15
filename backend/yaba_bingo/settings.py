@@ -5,11 +5,9 @@ import dj_database_url
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'unsafe-secret')
-# Make sure DEBUG is False in production
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = []
-# This automatically adds your Render URL to the allowed hosts
 RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
 if RENDER_EXTERNAL_HOSTNAME:
     ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
@@ -76,16 +74,20 @@ DATABASES = {
     )
 }
 
+# --- VVV THIS IS THE FINAL FIX VVV ---
+# This forces Django to use the standard password checker.
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+]
+# --- END OF FIX ---
+
 AUTH_USER_MODEL = 'bingo.User'
 
 CORS_ALLOW_ALL_ORIGINS = True
 
-# --- VVV THIS IS THE CSRF FIX VVV ---
-# These settings tell Django to trust the domain it's running on.
 CSRF_TRUSTED_ORIGINS = [f'https://{RENDER_EXTERNAL_HOSTNAME}'] if RENDER_EXTERNAL_HOSTNAME else []
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SECURE = True
-# --- END OF FIX ---
 
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'Africa/Addis_Ababa'
