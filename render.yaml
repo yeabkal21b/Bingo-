@@ -1,1 +1,52 @@
-  
+services:
+  # 1. The PostgreSQL Database
+  - type: pserv
+    name: yaba-bingo-db
+    env: postgres
+
+  # 2. The Redis Instance
+  - type: pserv
+    name: yaba-bingo-redis
+    env: redis
+
+  # 3. The Django Backend
+  - type: web
+    name: yaba-bingo-backend
+    env: python
+    rootDir: ./backend
+    buildCommand: "pip install -r requirements.txt && python manage.py collectstatic --no-input"
+    startCommand: "daphne yaba_bingo.asgi:application --port $PORT --bind 0.0.0.0"
+    healthCheckPath: /api/health/
+    envVars:
+      # VVV THIS IS THE CRITICAL PART VVV
+      # This tells Render to get the URL from the database service below
+      - key: DATABASE_URL
+        fromDatabase:
+          name: yaba-bingo-db # This name must match the database service name
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: pserv
+          name: yaba-bingo-redis
+          property: connectionString
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: false
+
+  # 4. The React Frontend
+  - type: static_site
+    name: yaba-bingo-frontend
+    rootDir: ./frontend
+    buildCommand: "npm install && npm run build"
+    staticPublishPath: dist
+    routes:
+      - type: rewrite
+        source: "/*"
+        destination: "/index.html"
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          type: web
+          name: yaba-bingo-backend
+          property: url  
