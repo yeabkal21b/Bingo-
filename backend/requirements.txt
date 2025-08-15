@@ -5,3 +5,5 @@ channels-redis
 psycopg2-binary
 django-cors-headers
 daphne
+whitenoise
+dj-database-url
