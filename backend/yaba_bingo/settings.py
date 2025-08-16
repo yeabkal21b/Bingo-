@@ -12,7 +12,6 @@ RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
 if RENDER_EXTERNAL_HOSTNAME:
     ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
 
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -74,12 +73,9 @@ DATABASES = {
     )
 }
 
-# --- VVV THIS IS THE FINAL FIX VVV ---
-# This forces Django to use the standard password checker.
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
 ]
-# --- END OF FIX ---
 
 AUTH_USER_MODEL = 'bingo.User'
 
