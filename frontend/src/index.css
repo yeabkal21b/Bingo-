@@ -2,8 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Custom global styles if needed */
+/* You can add any global base styles here if needed */
 body {
-  background-color: #1E1E1E;
-  color: #f5f6fa;
+    background-color: #1E1E1E; /* Sets the default dark background */
 }
