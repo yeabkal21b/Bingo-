@@ -11,11 +11,9 @@ export default function App() {
   const [currentUser, setCurrentUser] = useState(null);
   const [view, setView] = useState('game');
 
-  // This hook will now run once and automatically log the user in.
   useEffect(() => {
     const autoLogin = async () => {
       try {
-        // Call the new, insecure auto-login endpoint
         const response = await API.post('/api/auto-login-debug/');
         setIsAuthenticated(true);
         setCurrentUser(response.data);
@@ -23,7 +21,6 @@ export default function App() {
           setView('transactions');
         }
       } catch (error) {
-        // This will happen if the backend can't find the 'testuser'
         console.error("Auto-login failed:", error);
         setIsAuthenticated(false);
       } finally {
@@ -31,7 +28,7 @@ export default function App() {
       }
     };
     autoLogin();
-  }, []); // The empty array ensures this runs only once.
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -39,8 +36,7 @@ export default function App() {
     } finally {
       setIsAuthenticated(false);
       setCurrentUser(null);
-      // Optional: reload the page to trigger auto-login again
-      window.location.reload();
+      window.location.reload(); // Reload to trigger auto-login again
     }
   };
 
@@ -52,7 +48,6 @@ export default function App() {
     );
   }
 
-  // If auto-login failed for some reason
   if (!isAuthenticated) {
     return (
         <div className="flex items-center justify-center min-h-screen bg-background text-red-500">
@@ -61,7 +56,6 @@ export default function App() {
     );
   }
 
-  // The main application dashboard
   return (
     <div className="flex min-h-screen bg-background">
       <aside className="w-64 bg-rowAlt p-4 flex flex-col">
