@@ -1,27 +1,23 @@
-import React, { useState, useEffect } from 'react';
-import TransactionHistory from './components/TransactionHistory';
-import BoardActivationCenter from './components/BoardActivationCenter';
-import GameRunner from './components/GameRunner';
-import API from './services/api';
-import SidebarProfile from './components/SidebarProfile';
+// This is inside your App.jsx file
 
 export default function App() {
+  // ... (other state variables)
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [currentUser, setCurrentUser] = useState(null);
-  const [view, setView] = useState('game');
 
+  // This is the code that runs automatically when the page loads
   useEffect(() => {
     const autoLogin = async () => {
       try {
+        // It tries to call the backend auto-login endpoint
         const response = await API.post('/api/auto-login-debug/');
+        // If the backend call is successful, it sets isAuthenticated to true
         setIsAuthenticated(true);
-        setCurrentUser(response.data);
-        if (response.data.is_agent) {
-          setView('transactions');
-        }
+        // ...
       } catch (error) {
+        // If the backend call FAILS for any reason, it comes here
         console.error("Auto-login failed:", error);
+        // And it sets isAuthenticated to false
         setIsAuthenticated(false);
       } finally {
         setIsLoading(false);
@@ -30,54 +26,28 @@ export default function App() {
     autoLogin();
   }, []);
 
-  const handleLogout = async () => {
-    try {
-      await API.post('/api/logout/');
-    } finally {
-      setIsAuthenticated(false);
-      setCurrentUser(null);
-      window.location.reload(); // Reload to trigger auto-login again
-    }
-  };
+  // ... (the handleLogout function) ...
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-background text-gold">
-        Loading...
-      </div>
-    );
+    // First it shows "Loading..."
+    return ( <div>Loading...</div> );
   }
 
+  // --- VVV THIS IS THE EXACT CODE BLOCK CAUSING THE ERROR VVV ---
+  // After loading, it checks if the user is authenticated
   if (!isAuthenticated) {
+    // If auto-login failed, isAuthenticated is false, so it comes here
+    // And it displays the error message you are seeing.
     return (
         <div className="flex items-center justify-center min-h-screen bg-background text-red-500">
             Could not automatically log in. Please ensure the user 'testuser' exists and is an agent.
         </div>
     );
   }
+  // --- END OF THE CODE BLOCK ---
 
+  // If isAuthenticated is true, it shows the main dashboard
   return (
-    <div className="flex min-h-screen bg-background">
-      <aside className="w-64 bg-rowAlt p-4 flex flex-col">
-        <SidebarProfile username={currentUser?.username} />
-        <nav className="flex flex-col gap-4">
-          {currentUser?.is_agent && (
-            <button onClick={() => setView('transactions')} className={`text-left px-2 py-1 rounded ${view === 'transactions' ? 'bg-blue text-white' : 'text-blue'}`}>Transaction History</button>
-          )}
-          <button onClick={() => setView('boards')} className={`text-left px-2 py-1 rounded ${view === 'boards' ? 'bg-blue text-white' : 'text-blue'}`}>Board Activation Center</button>
-          <button onClick={() => setView('game')} className={`text-left px-2 py-1 rounded ${view === 'game' ? 'bg-blue text-white' : 'text-blue'}`}>Game Runner</button>
-        </nav>
-        <div className="mt-auto">
-          <button onClick={handleLogout} className="bg-red-600 text-white font-bold w-full py-2 rounded hover:bg-red-700">
-            Logout
-          </button>
-        </div>
-      </aside>
-      <main className="flex-1 p-8">
-        {view === 'transactions' && currentUser?.is_agent && <TransactionHistory />}
-        {view === 'boards' && <BoardActivationCenter boards={Array.from({ length: 100 }, (_, i) => ({ id: i + 1 }))} />}
-        {view === 'game' && <GameRunner calledNumbers={[7, 12, 34, 56]} />}
-      </main>
-    </div>
+    // ... the main dashboard JSX ...
   );
 }
