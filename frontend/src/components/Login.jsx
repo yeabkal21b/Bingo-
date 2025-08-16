@@ -1,29 +1,25 @@
 import React, { useState } from 'react';
-import API from '../services/api'; // Use your existing API instance
+import API from '../services/api';
 
+// --- THIS IS THE MODIFIED, PASSWORDLESS LOGIN FORM ---
 export default function Login({ onLogin }) {
   const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
   const handleSubmit = async (e) => {
-    e.preventDefault(); // Prevent the page from reloading
+    e.preventDefault();
     setError('');
 
-    // Do not let the user in if fields are blank
-    if (!username || !password) {
-      setError('Please enter a username and password.');
+    if (!username) {
+      setError('Please enter a username.');
       return;
     }
 
     try {
-      // This is the critical part: try to log in with the backend
-      const response = await API.post('/api/login/', { username, password });
-      
-      // ONLY if the backend says the password is correct, call onLogin
+      // Send only the username to the backend
+      const response = await API.post('/api/login/', { username });
       onLogin(response.data);
     } catch (err) {
-      // If the backend returns an error (wrong password), show an error
       setError('Invalid credentials. Please try again.');
     }
   };
@@ -40,17 +36,10 @@ export default function Login({ onLogin }) {
           className="mb-3 p-2 w-full rounded bg-background text-text border border-blue" 
           required 
         />
-        <input 
-          type="password" 
-          placeholder="Password" 
-          value={password}
-          onChange={e => setPassword(e.target.value)}
-          className="mb-3 p-2 w-full rounded bg-background text-text border border-blue" 
-          required 
-        />
         <button type="submit" className="bg-gold text-background font-bold w-full py-2 rounded mb-2">Login</button>
         {error && <div className="text-red-500 text-center">{error}</div>}
       </form>
     </div>
   );
 }
+// --- END OF MODIFIED FORM ---
