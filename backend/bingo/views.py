@@ -5,7 +5,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import Agent, Transaction, User
 
-# --- THIS IS THE NEW, AUTOMATIC LOGIN VIEW ---
+# --- THIS IS THE NEW, AUTOMATIC LOGIN VIEW (SYNTAX FIXED) ---
 class AutoLoginDebugView(APIView):
     """
     FOR DEBUGGING ONLY: Automatically logs in a hardcoded user.
@@ -13,8 +13,6 @@ class AutoLoginDebugView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request, *args, **kwargs):
-        # We will hardcode the user to log in as.
-        # Make sure this user exists in your database and is an agent.
         username_to_login = "testuser" 
         
         try:
@@ -23,4 +21,34 @@ class AutoLoginDebugView(APIView):
             
             is_agent_check = hasattr(user, 'agent')
             
-          
+            return Response({
+                'status': 'success', 
+                'username': user.username,
+                'is_agent': is_agent_check
+            })
+        # THIS 'except' BLOCK WAS MISSING AND IS NOW FIXED
+        except User.DoesNotExist:
+            return Response({'detail': f"Debug user '{username_to_login}' not found."}, status=500)
+
+# --- Other views remain the same ---
+class HealthCheckView(APIView):
+    permission_classes = [AllowAny]
+    def get(self, request, *args, **kwargs): return Response({"status": "ok"})
+
+class LogoutView(APIView):
+    permission_classes = [IsAuthenticated]
+    def post(self, request, *args, **kwargs):
+        logout(request)
+        return Response({'status': 'success'})
+
+class TransactionListView(APIView):
+    permission_classes = [IsAuthenticated]
+    def get(self, request):
+        try:
+            agent = Agent.objects.get(user=request.user)
+        except Agent.DoesNotExist:
+            return Response({'detail': 'Not an agent'}, status=status.HTTP_403_FORBIDDEN)
+        
+        transactions = Transaction.objects.filter(agent=agent).order_by('-timestamp')
+        serializer = TransactionSerializer(transactions, many=True)
+        return Response(serializer.data)
