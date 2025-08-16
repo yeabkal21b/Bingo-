@@ -1,23 +1,22 @@
 import React, { useState } from 'react';
 import API from '../services/api';
 
-// --- THIS IS THE MODIFIED, PASSWORDLESS LOGIN FORM ---
 export default function Login({ onLogin }) {
   const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
-    if (!username) {
-      setError('Please enter a username.');
+    if (!username || !password) {
+      setError('Please enter a username and password.');
       return;
     }
 
     try {
-      // Send only the username to the backend
-      const response = await API.post('/api/login/', { username });
+      const response = await API.post('/api/login/', { username, password });
       onLogin(response.data);
     } catch (err) {
       setError('Invalid credentials. Please try again.');
@@ -36,10 +35,17 @@ export default function Login({ onLogin }) {
           className="mb-3 p-2 w-full rounded bg-background text-text border border-blue" 
           required 
         />
+        <input 
+          type="password" 
+          placeholder="Password" 
+          value={password}
+          onChange={e => setPassword(e.target.value)}
+          className="mb-3 p-2 w-full rounded bg-background text-text border border-blue" 
+          required 
+        />
         <button type="submit" className="bg-gold text-background font-bold w-full py-2 rounded mb-2">Login</button>
         {error && <div className="text-red-500 text-center">{error}</div>}
       </form>
     </div>
   );
 }
-// --- END OF MODIFIED FORM ---
