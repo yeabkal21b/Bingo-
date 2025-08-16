@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import TransactionHistory from './components/TransactionHistory';
 import BoardActivationCenter from './components/BoardActivationCenter';
 import GameRunner from './components/GameRunner';
@@ -7,34 +7,16 @@ import API from './services/api';
 import SidebarProfile from './components/SidebarProfile';
 
 export default function App() {
+  // We will always start in a logged-out state.
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
   const [currentUser, setCurrentUser] = useState(null);
   const [view, setView] = useState('game');
 
-  useEffect(() => {
-    const checkAuthStatus = async () => {
-      try {
-        const response = await API.get('/api/user/');
-        setIsAuthenticated(true);
-        setCurrentUser(response.data);
-        if (response.data.is_agent) {
-          setView('transactions');
-        }
-      } catch (error) {
-        setIsAuthenticated(false);
-        setCurrentUser(null);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    checkAuthStatus();
-  }, []);
-
+  // This function is ONLY called after a SUCCESSFUL login.
   const handleLogin = (userData) => {
     setIsAuthenticated(true);
     setCurrentUser(userData);
-    if (userData.username && userData.is_agent) {
+    if (userData && userData.is_agent) {
       setView('transactions');
     } else {
       setView('game');
@@ -50,24 +32,17 @@ export default function App() {
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-background text-gold">
-        Loading...
-      </div>
-    );
-  }
-
+  // If not logged in, the ONLY thing shown is the Login page.
   if (!isAuthenticated) {
     return <Login onLogin={handleLogin} />;
   }
 
+  // This is only rendered AFTER a successful login.
   return (
     <div className="flex min-h-screen bg-background">
       <aside className="w-64 bg-rowAlt p-4 flex flex-col">
         <SidebarProfile username={currentUser?.username} />
         <nav className="flex flex-col gap-4">
-          {/* This button will now appear correctly for agents */}
           {currentUser?.is_agent && (
             <button onClick={() => setView('transactions')} className={`text-left px-2 py-1 rounded ${view === 'transactions' ? 'bg-blue text-white' : 'text-blue'}`}>Transaction History</button>
           )}
