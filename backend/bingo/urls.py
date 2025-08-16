@@ -1,21 +1,17 @@
 from django.urls import path
 from .views import (
-    HealthCheckView,
-    TransactionListView,
-    LoginView,
-    LogoutView,
-    UserView
+    HealthCheckView, 
+    LogoutView, 
+    TransactionListView, 
+    AutoLoginDebugView # This is the new view we are using
 )
 
 urlpatterns = [
-    # Utility/Health Check endpoint
+    # The new automatic login endpoint
+    path('api/auto-login-debug/', AutoLoginDebugView.as_view(), name='auto-login-debug'),
+    
+    # Other necessary endpoints
     path('api/health/', HealthCheckView.as_view(), name='health-check'),
-    
-    # Authentication endpoints
-    path('api/login/', LoginView.as_view(), name='api-login'),
     path('api/logout/', LogoutView.as_view(), name='api-logout'),
-    path('api/user/', UserView.as_view(), name='api-user'),
-    
-    # Main application endpoints
     path('api/transactions/', TransactionListView.as_view(), name='transaction-list'),
 ]
